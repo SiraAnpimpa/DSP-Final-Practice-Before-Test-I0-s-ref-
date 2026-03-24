@@ -1,0 +1,1124 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DSP Practice Exam — Ch 7-10</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{--bg:#0f172a;--card:#1e293b;--card2:#334155;--accent:#6366f1;--accent2:#818cf8;--green:#22c55e;--red:#ef4444;--yellow:#eab308;--text:#f1f5f9;--text2:#94a3b8;--border:#475569;--correct-bg:rgba(34,197,94,.12);--wrong-bg:rgba(239,68,68,.12)}
+body{font-family:'Segoe UI',Tahoma,sans-serif;background:var(--bg);color:var(--text);min-height:100vh;line-height:1.6}
+.container{max-width:900px;margin:0 auto;padding:16px}
+h1{font-size:1.6rem;text-align:center;margin:20px 0 8px;background:linear-gradient(135deg,var(--accent),#a78bfa);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.subtitle{text-align:center;color:var(--text2);font-size:.9rem;margin-bottom:24px}
+.tabs{display:flex;gap:6px;margin-bottom:16px;flex-wrap:wrap}
+.tab{padding:8px 18px;border-radius:8px;border:1px solid var(--border);background:var(--card);cursor:pointer;color:var(--text2);font-size:.85rem;transition:.2s}
+.tab:hover{border-color:var(--accent)}
+.tab.active{background:var(--accent);color:#fff;border-color:var(--accent)}
+.tab .badge{display:inline-block;background:rgba(255,255,255,.2);border-radius:10px;padding:0 7px;font-size:.75rem;margin-left:5px}
+.card{background:var(--card);border-radius:12px;padding:20px;margin-bottom:14px;border:1px solid transparent;transition:.2s}
+.card.correct-card{border-color:var(--green);background:var(--correct-bg)}
+.card.wrong-card{border-color:var(--red);background:var(--wrong-bg)}
+.q-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
+.q-num{font-weight:700;color:var(--accent2);font-size:.95rem}
+.q-ch{font-size:.75rem;color:var(--text2);background:var(--card2);padding:2px 10px;border-radius:12px}
+.q-text{font-size:1rem;margin-bottom:14px;line-height:1.7}
+.q-text code{background:var(--card2);padding:1px 6px;border-radius:4px;font-family:'Courier New',monospace;font-size:.9em}
+.options{display:grid;gap:6px}
+.opt{display:flex;align-items:flex-start;gap:10px;padding:10px 14px;border-radius:8px;border:1px solid var(--border);cursor:pointer;transition:.15s;user-select:none}
+.opt:hover{border-color:var(--accent);background:rgba(99,102,241,.08)}
+.opt.selected{border-color:var(--accent);background:rgba(99,102,241,.15)}
+.opt.show-correct{border-color:var(--green);background:var(--correct-bg)}
+.opt.show-wrong{border-color:var(--red);background:var(--wrong-bg)}
+.opt-letter{min-width:24px;height:24px;display:flex;align-items:center;justify-content:center;border-radius:50%;border:1.5px solid var(--border);font-size:.8rem;font-weight:600;flex-shrink:0;margin-top:1px}
+.opt.selected .opt-letter{background:var(--accent);border-color:var(--accent);color:#fff}
+.opt.show-correct .opt-letter{background:var(--green);border-color:var(--green);color:#fff}
+.opt.show-wrong .opt-letter{background:var(--red);border-color:var(--red);color:#fff}
+.opt-text{font-size:.9rem;line-height:1.5}
+.calc-input{width:100%;background:var(--card2);border:1px solid var(--border);border-radius:8px;padding:12px;color:var(--text);font-size:.95rem;resize:vertical;min-height:100px;font-family:inherit}
+.calc-input:focus{outline:none;border-color:var(--accent)}
+.hint-box{margin-top:10px;padding:10px 14px;border-radius:8px;font-size:.85rem;line-height:1.6}
+.hint-box.ans{background:rgba(34,197,94,.1);border:1px solid rgba(34,197,94,.3);color:#86efac}
+.hint-box.explain{background:rgba(99,102,241,.1);border:1px solid rgba(99,102,241,.3);color:#c7d2fe}
+.btn-row{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+.btn{padding:8px 20px;border-radius:8px;border:none;cursor:pointer;font-size:.85rem;font-weight:600;transition:.15s}
+.btn-primary{background:var(--accent);color:#fff}.btn-primary:hover{background:#4f46e5}
+.btn-outline{background:transparent;border:1px solid var(--border);color:var(--text2)}.btn-outline:hover{border-color:var(--accent);color:var(--text)}
+.btn-green{background:var(--green);color:#fff}.btn-green:hover{background:#16a34a}
+.scoreboard{background:linear-gradient(135deg,#312e81,#1e1b4b);border-radius:16px;padding:24px;text-align:center;margin:20px 0}
+.score-big{font-size:3rem;font-weight:800;background:linear-gradient(135deg,var(--green),#6ee7b7);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.score-sub{color:var(--text2);font-size:.9rem;margin-top:4px}
+.progress-bar{height:4px;background:var(--card2);border-radius:4px;margin:12px 0;overflow:hidden}
+.progress-fill{height:100%;background:var(--accent);border-radius:4px;transition:width .3s}
+.nav-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(38px,1fr));gap:4px;margin:12px 0}
+.nav-cell{width:100%;aspect-ratio:1;border-radius:6px;border:1px solid var(--border);background:var(--card2);cursor:pointer;font-size:.75rem;font-weight:600;color:var(--text2);display:flex;align-items:center;justify-content:center;transition:.15s}
+.nav-cell:hover{border-color:var(--accent)}
+.nav-cell.answered{background:var(--accent);border-color:var(--accent);color:#fff}
+.nav-cell.nav-correct{background:var(--green);border-color:var(--green);color:#fff}
+.nav-cell.nav-wrong{background:var(--red);border-color:var(--red);color:#fff}
+.nav-cell.current{box-shadow:0 0 0 2px var(--yellow)}
+.timer{text-align:center;font-size:1.3rem;font-weight:700;color:var(--yellow);margin:8px 0}
+.summary-row{display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border);font-size:.9rem}
+.flex-between{display:flex;justify-content:space-between;align-items:center}
+.hidden{display:none}
+.tag-multi{font-size:.7rem;background:var(--yellow);color:#000;padding:1px 6px;border-radius:8px;font-weight:600}
+.tag-single{font-size:.7rem;background:var(--accent);color:#fff;padding:1px 6px;border-radius:8px;font-weight:600}
+.formula{font-family:'Courier New',monospace;background:var(--card2);padding:2px 8px;border-radius:4px;white-space:nowrap}
+@media(max-width:600px){.container{padding:10px}.q-text{font-size:.92rem}.opt{padding:8px 10px}}
+</style>
+</head>
+<body>
+<div class="container" id="app"></div>
+<script>
+// ============ QUESTION DATA ============
+const LETTERS = "ABCDEFGHIJ";
+
+// MCQ: ch, question, options[10], correctIndices[]
+// If correctIndices.length > 1 → multi-answer
+const MCQ = [
+// ===== CHAPTER 7: DFT / FFT (15 questions) =====
+{ch:7, q:"DFT ของสัญญาณ x[n] ที่มี N จุด คำนวณจากสูตรใด", opts:[
+"X[k] = Σ x[n]·e^(-j2πkn/N) สำหรับ n=0..N-1",
+"X[k] = Σ x[n]·e^(j2πkn/N) สำหรับ n=0..N-1",
+"X[k] = (1/N) Σ x[n]·e^(-j2πkn/N)",
+"X[k] = Σ x[n]·cos(2πkn/N)",
+"X[k] = Σ x[n]·e^(-jπkn/N)",
+"X[k] = N · Σ x[n]·e^(-j2πkn/N)",
+"X[k] = Σ x(t)·e^(-j2πft) dt",
+"X[k] = x[n] * h[n]",
+"X[k] = Σ x[n]·δ[n-k]",
+"X[k] = Σ x[n]·W_N^(kn) โดย W_N = e^(j2π/N)"], ans:[0]},
+
+{ch:7, q:"Inverse DFT (IDFT) มีสูตรอย่างไร", opts:[
+"x[n] = (1/N) Σ X[k]·e^(j2πkn/N) สำหรับ k=0..N-1",
+"x[n] = Σ X[k]·e^(-j2πkn/N)",
+"x[n] = N · Σ X[k]·e^(j2πkn/N)",
+"x[n] = (1/N) Σ X[k]·e^(-j2πkn/N)",
+"x[n] = Σ X[k]·cos(2πkn/N)",
+"x[n] = (1/2π) Σ X[k]·e^(j2πkn/N)",
+"x[n] = Σ X[k]·δ[n-k]",
+"x[n] = (1/N) Σ X[k]·W_N^(-kn) โดย W_N = e^(-j2π/N)",
+"x[n] = DFT{X[k]}",
+"x[n] = X[k] · e^(jωn)"], ans:[0]},
+
+{ch:7, q:"ถ้า Sampling Rate = 1000 Hz และใช้ DFT ขนาด N = 256 จุด ค่า Frequency Resolution (Δf) เท่ากับเท่าใด", opts:[
+"3.91 Hz","4.00 Hz","2.56 Hz","1.95 Hz","5.00 Hz","0.256 Hz","256 Hz","7.81 Hz","0.001 Hz","39.1 Hz"], ans:[0]},
+
+{ch:7, q:"ข้อใดเป็นคุณสมบัติของ DFT (เลือกได้หลายข้อ)", opts:[
+"DFT เป็นการแปลงแบบ periodic ทั้งในโดเมนเวลาและความถี่",
+"DFT มี Linearity property: DFT{ax₁+bx₂} = a·X₁+b·X₂",
+"DFT มี Circular shift property",
+"DFT ใช้ได้กับสัญญาณ continuous-time เท่านั้น",
+"DFT มี Parseval's theorem: Σ|x[n]|² = (1/N)Σ|X[k]|²",
+"การคูณใน time domain เท่ากับ circular convolution ใน frequency domain",
+"DFT ของสัญญาณ real-valued มี conjugate symmetry: X[N-k] = X*[k]",
+"DFT สามารถคำนวณได้ด้วย O(N) operations เสมอ",
+"ค่า X[0] คือค่า DC component = Σx[n]",
+"DFT ต้องการ N เป็นจำนวนเฉพาะเท่านั้น"], ans:[0,1,2,4,5,6,8]},
+
+{ch:7, q:"FFT (Fast Fourier Transform) แบบ Radix-2 มีจำนวน operations เป็นเท่าใด เทียบกับ DFT ปกติ", opts:[
+"DFT ใช้ O(N²), FFT ใช้ O(N log₂ N)",
+"DFT ใช้ O(N²), FFT ใช้ O(N)",
+"DFT ใช้ O(N log N), FFT ใช้ O(N)",
+"DFT ใช้ O(N³), FFT ใช้ O(N²)",
+"ทั้งคู่ใช้ O(N²) เท่ากัน",
+"DFT ใช้ O(2^N), FFT ใช้ O(N²)",
+"FFT เร็วกว่า DFT เสมอ 2 เท่า",
+"DFT ใช้ O(N), FFT ใช้ O(log N)",
+"FFT ลด computation ลงโดยใช้ symmetry ของ twiddle factor",
+"FFT ทำงานได้เมื่อ N เป็นเลขยกกำลัง 2 เท่านั้น"], ans:[0,8]},
+
+{ch:7, q:"Spectral Leakage เกิดจากสาเหตุใด", opts:[
+"ความถี่ของสัญญาณไม่ตรงกับ bin ของ DFT พอดี",
+"สัญญาณถูกตัดด้วย rectangular window ที่มีความยาวจำกัด",
+"ใช้ N น้อยเกินไปทำให้ resolution ต่ำ",
+"Sampling rate สูงเกินไป",
+"เกิดจาก Aliasing ใน frequency domain",
+"ใช้ FFT แทน DFT",
+"สามารถลด Leakage ได้ด้วยการใช้ window function เช่น Hanning, Hamming",
+"Leakage ทำให้พลังงานกระจายไปยัง bin ข้างเคียง",
+"เกิดเฉพาะเมื่อสัญญาณเป็น DC",
+"Leakage ไม่สามารถแก้ไขได้เลย"], ans:[0,1,6,7]},
+
+{ch:7, q:"ถ้า x[n] = [1, 2, 3, 4] (N=4) ค่า X[0] เท่ากับเท่าใด", opts:[
+"10","4","2.5","0","1","6","8","√10","1+2+3+4 = 10","ไม่สามารถคำนวณได้"], ans:[0,8]},
+
+{ch:7, q:"ข้อใดคือประโยชน์ของ Zero-padding ใน DFT (เลือกได้หลายข้อ)", opts:[
+"เพิ่ม frequency resolution ที่แท้จริงของ DFT",
+"ทำให้กราฟ spectrum ดูเรียบขึ้น (interpolation)",
+"ทำให้ N เป็นเลขยกกำลัง 2 เพื่อใช้ FFT ได้",
+"เพิ่มจำนวน frequency bin ที่แสดงผล",
+"ลด Spectral Leakage ได้อย่างสมบูรณ์",
+"ช่วยให้เห็นรายละเอียดของ spectrum ได้ชัดเจนขึ้น",
+"เพิ่ม SNR ของสัญญาณ",
+"ทำให้ DFT เร็วขึ้นเสมอ",
+"ลด Aliasing ใน frequency domain",
+"ไม่มีประโยชน์ใดๆ เลย"], ans:[1,2,3,5]},
+
+{ch:7, q:"Twiddle Factor W_N มีนิยามอย่างไร", opts:[
+"W_N = e^(-j2π/N)","W_N = e^(j2π/N)","W_N = e^(-jπ/N)","W_N = cos(2π/N)",
+"W_N = e^(-j2πN)","W_N = 2π/N","W_N = N·e^(-j2π)","W_N = sin(2π/N) + j·cos(2π/N)",
+"W_N = 1/N","W_N = e^(-j2π/(N-1))"], ans:[0]},
+
+{ch:7, q:"ถ้าสัญญาณมีความถี่ 50 Hz, Sampling rate = 200 Hz, N = 8 จุด ความถี่ 50 Hz จะอยู่ที่ bin ใด", opts:[
+"k = 2","k = 1","k = 4","k = 3","k = 0","k = 5","k = 50","k = 8","k = 6","k = 7"], ans:[0]},
+
+{ch:7, q:"Window Function แบบใดมี Main Lobe แคบที่สุด", opts:[
+"Rectangular","Hanning","Hamming","Blackman","Kaiser","Bartlett","Flat-top","Gaussian","Triangular","Tukey"], ans:[0]},
+
+{ch:7, q:"ข้อใดกล่าวถูกต้องเกี่ยวกับ FFT Butterfly diagram (เลือกได้หลายข้อ)", opts:[
+"แต่ละ stage มี N/2 butterfly operations",
+"Radix-2 FFT มีทั้งหมด log₂(N) stages",
+"แต่ละ butterfly ใช้การคูณ 1 ครั้งและการบวก/ลบ 2 ครั้ง",
+"Input ของ Decimation-in-Time FFT ต้องเรียงแบบ bit-reversal",
+"FFT Butterfly ใช้ได้เฉพาะกับ N เป็นเลขคู่",
+"Butterfly operation: X = A + W·B, Y = A - W·B",
+"จำนวน complex multiplications ทั้งหมด = (N/2)·log₂(N)",
+"Twiddle factor ในแต่ละ stage จะเหมือนกันทุก butterfly",
+"FFT ไม่สามารถทำ in-place computation ได้",
+"Output ของ DIT-FFT อยู่ในลำดับปกติ"], ans:[0,1,2,3,5,6,9]},
+
+{ch:7, q:"DFT ของสัญญาณ real-valued x[n] มีคุณสมบัติ symmetry อย่างไร", opts:[
+"X[k] = X*[N-k] (conjugate symmetry)",
+"|X[k]| = |X[N-k]| (magnitude symmetry)",
+"∠X[k] = -∠X[N-k] (phase anti-symmetry)",
+"Re{X[k]} เป็น even function, Im{X[k]} เป็น odd function",
+"X[k] เป็น real ทั้งหมด",
+"X[k] = X[N-k] (ไม่ต้อง conjugate)",
+"ไม่มี symmetry ใดๆ",
+"X[k] เป็น imaginary ทั้งหมด",
+"มีเฉพาะข้อ A เท่านั้นที่ถูก",
+"ข้อ A, B, C, D ถูกทั้งหมด"], ans:[0,1,2,3,9]},
+
+{ch:7, q:"Chirp signal (สัญญาณที่ความถี่เปลี่ยนตามเวลา) เมื่อนำมาทำ DFT จะเห็นลักษณะ spectrum อย่างไร", opts:[
+"พลังงานกระจายไปหลาย frequency bins เพราะความถี่เปลี่ยนตลอดเวลา",
+"เห็นเป็น single peak ชัดเจน",
+"Spectrum เป็นค่าคงที่ทุก bin",
+"ไม่สามารถทำ DFT กับ chirp signal ได้",
+"ใช้ Short-Time DFT (STFT) จะวิเคราะห์ chirp ได้ดีกว่า",
+"Chirp signal ให้ผลเหมือน white noise ใน frequency domain",
+"ความกว้างของ spectrum ขึ้นกับ sweep rate ของ chirp",
+"DFT ของ chirp จะเป็น chirp ใน frequency domain เช่นกัน",
+"Chirp signal มี DFT เป็นศูนย์ทุก bin",
+"ต้องใช้ N → ∞ จึงจะเห็น spectrum ของ chirp"], ans:[0,4,6]},
+
+{ch:7, q:"ถ้า Sampling Rate = 8000 Hz, N = 1024 ค่า Δf และ ความถี่สูงสุดที่วิเคราะห์ได้คือเท่าใด", opts:[
+"Δf = 7.8125 Hz, f_max = 4000 Hz",
+"Δf = 8 Hz, f_max = 4000 Hz",
+"Δf = 7.8125 Hz, f_max = 8000 Hz",
+"Δf = 3.9 Hz, f_max = 4000 Hz",
+"Δf = 7.8125 Hz, f_max = 3996 Hz",
+"Δf = 1024 Hz, f_max = 512 Hz",
+"Δf = 0.125 Hz, f_max = 4000 Hz",
+"Δf = 15.625 Hz, f_max = 4000 Hz",
+"Δf = 7.8125 Hz, f_max = 512 Hz",
+"Δf = 1 Hz, f_max = 1024 Hz"], ans:[0]},
+
+// ===== CHAPTER 8: FIR Filter (15 questions) =====
+{ch:8, q:"FIR Filter มีสมการ difference equation ทั่วไปอย่างไร", opts:[
+"y[n] = Σ b_k · x[n-k] สำหรับ k=0..M",
+"y[n] = Σ a_k · y[n-k] + Σ b_k · x[n-k]",
+"y[n] = b₀·x[n] + b₁·x[n-1] เท่านั้น",
+"y[n] = x[n] · h[n]",
+"y[n] = x[n] + y[n-1]",
+"Y(z) = H(z) / X(z)",
+"y[n] = (1/M) Σ x[n-k]",
+"y[n] = b₀·x[n] - a₁·y[n-1]",
+"y[n] = Σ b_k · x[n+k]",
+"y[n] = x[n] ⊕ h[n]"], ans:[0]},
+
+{ch:8, q:"ข้อใดเป็นข้อดีของ FIR Filter เมื่อเทียบกับ IIR (เลือกได้หลายข้อ)", opts:[
+"มี Linear Phase ได้ง่าย (ถ้า coefficients สมมาตร)",
+"เสถียรเสมอ (Always Stable) เพราะไม่มี feedback",
+"ใช้จำนวน coefficients น้อยกว่า IIR สำหรับ spec เดียวกัน",
+"ออกแบบง่ายด้วยวิธี Window method",
+"มี poles อยู่ที่ z = 0 เท่านั้น",
+"ไม่มี phase distortion เมื่อเป็น linear phase",
+"ต้องการ memory น้อยกว่า IIR",
+"ใช้ computation น้อยกว่า IIR เสมอ",
+"สามารถ implement ด้วย convolution โดยตรง",
+"เหมาะกับ real-time applications มากกว่า IIR เสมอ"], ans:[0,1,3,4,5,8]},
+
+{ch:8, q:"Moving Average Filter ขนาด M = 4: y[n] = (1/4)(x[n]+x[n-1]+x[n-2]+x[n-3]) เป็น filter ประเภทใด", opts:[
+"FIR Low-pass filter","IIR Low-pass filter","FIR High-pass filter","FIR Band-pass filter",
+"IIR Band-pass filter","FIR All-pass filter","FIR Notch filter","Adaptive filter",
+"Recursive filter","Median filter"], ans:[0]},
+
+{ch:8, q:"ถ้า FIR filter มี coefficients h = [1, 2, 3, 2, 1] จำนวน tap เท่ากับเท่าใด และ order เท่าใด", opts:[
+"5 taps, order 4","4 taps, order 5","5 taps, order 5","4 taps, order 4",
+"5 taps, order 3","3 taps, order 4","6 taps, order 5","5 taps, order 2",
+"5 taps, order 1","order = จำนวน taps เสมอ คือ 5"], ans:[0]},
+
+{ch:8, q:"Linear Phase FIR filter ต้องมีเงื่อนไขใด", opts:[
+"Impulse response สมมาตร: h[n] = h[M-n] หรือ anti-symmetric: h[n] = -h[M-n]",
+"Coefficients ทุกตัวเป็นจำนวนบวก",
+"จำนวน taps เป็นเลขคี่เท่านั้น",
+"ต้องมี feedback loop",
+"Transfer function H(z) มี poles ทั้งหมดอยู่ในวงกลม unit circle",
+"Group delay คงที่ = M/2 samples",
+"Phase response เป็นเส้นตรง: φ(ω) = -αω",
+"ทั้งข้อ A, F, G ถูกต้อง",
+"ต้องใช้ Hamming window ในการออกแบบ",
+"Coefficients ต้องเป็นจำนวนเต็มเท่านั้น"], ans:[0,5,6,7]},
+
+{ch:8, q:"FIR filter ออกแบบด้วยวิธี Window Method มีขั้นตอนหลักอย่างไร", opts:[
+"กำหนด ideal frequency response → คำนวณ ideal impulse response (IDFT) → คูณด้วย window function → ได้ h[n]",
+"กำหนด poles/zeros → คำนวณ coefficients",
+"ใช้ Bilinear Transform จาก analog prototype",
+"กำหนด magnitude response → ใช้ Remez algorithm",
+"สุ่ม coefficients แล้วปรับจนได้ผลที่ต้องการ",
+"ใช้ Butterworth approximation แล้วแปลงเป็น FIR",
+"ออกแบบ IIR ก่อนแล้วตัด feedback ออก",
+"ใช้ least-squares optimization",
+"กำหนด cutoff frequency → ใช้ sinc function · window",
+"ข้อ A และ I อธิบายสิ่งเดียวกัน"], ans:[0,8,9]},
+
+{ch:8, q:"Window function แบบ Hamming เทียบกับ Rectangular window มีข้อดีอย่างไร (เลือกได้หลายข้อ)", opts:[
+"Side lobe ต่ำกว่า ทำให้ stopband attenuation ดีกว่า",
+"Main lobe แคบกว่า ทำให้ transition band แคบกว่า",
+"ลด Gibbs phenomenon / ripple ที่ขอบ passband",
+"ใช้ computation น้อยกว่า",
+"Hamming: stopband attenuation ≈ -53 dB vs Rectangular ≈ -21 dB",
+"Hamming window ทำให้ filter มี minimum phase",
+"Hamming ให้ผลเหมือน Blackman ทุกประการ",
+"Main lobe กว้างกว่า Rectangular เล็กน้อย (trade-off)",
+"ใช้สูตร w[n] = 0.54 - 0.46·cos(2πn/M)",
+"Hamming window เพิ่ม passband gain"], ans:[0,2,4,7,8]},
+
+{ch:8, q:"Transfer function ของ FIR filter มีลักษณะอย่างไร", opts:[
+"H(z) = Σ b_k · z^(-k) มีเฉพาะ zeros (poles ที่ z=0)",
+"H(z) = B(z)/A(z) มีทั้ง poles และ zeros",
+"H(z) มี poles อยู่นอก unit circle เสมอ",
+"H(z) เป็น polynomial ใน z (ไม่ใช่ z⁻¹)",
+"H(z) = 1/(1 - a·z⁻¹)",
+"FIR filter ไม่มี transfer function",
+"H(z) = z^(-M) เสมอ (pure delay)",
+"H(z) เป็น polynomial ใน z⁻¹ (FIR = all-zero filter)",
+"ข้อ A และ G อธิบายสิ่งเดียวกัน",
+"H(z) ต้องมีจำนวน zeros เป็นเลขคู่เท่านั้น"], ans:[0,7,8]},
+
+{ch:8, q:"ถ้าต้องการออกแบบ FIR Low-pass filter ด้วย cutoff frequency = 1000 Hz, Sampling rate = 8000 Hz, N = 21 taps ค่า normalized cutoff frequency (ωc) เท่ากับเท่าใด", opts:[
+"ωc = π/4 rad/sample","ωc = π/8 rad/sample","ωc = π/2 rad/sample","ωc = 1000 rad/sample",
+"ωc = 0.25π rad/sample","ωc = 2π·1000/8000 = π/4","ข้อ A, E, F ให้ค่าเดียวกัน","ωc = 1/8 rad/sample",
+"ωc = 0.125 rad/sample","ωc = 1000/8000 = 0.125 (ไม่คูณ 2π)"], ans:[0,4,5,6]},
+
+{ch:8, q:"FIR filter แบบ Type I (symmetric, odd length) มีคุณสมบัติอย่างไร", opts:[
+"ใช้ออกแบบ Low-pass, High-pass, Band-pass, Band-stop ได้ทุกแบบ",
+"h[n] = h[M-n] โดย M = N-1 (symmetric)",
+"มีจุดสมมาตรอยู่ที่ตัว coefficient ตรงกลาง",
+"Group delay = M/2 = (N-1)/2 samples",
+"H(e^jπ) ไม่จำเป็นต้องเท่ากับศูนย์",
+"ใช้ออกแบบ High-pass ไม่ได้",
+"h[n] = -h[M-n]",
+"จำนวน taps เป็นเลขคู่",
+"ข้อ A-E ถูกทั้งหมด",
+"ไม่มี linear phase"], ans:[0,1,2,3,8]},
+
+{ch:8, q:"FIR filter แบบ Type II (symmetric, even length) มีข้อจำกัดอะไร", opts:[
+"ใช้ออกแบบ High-pass filter ไม่ได้ เพราะ H(e^jπ) = 0 เสมอ",
+"ใช้ออกแบบ filter ทุกประเภทได้",
+"ไม่มี linear phase",
+"ไม่เสถียร",
+"ต้องใช้ Hamming window เท่านั้น",
+"มี group delay ไม่คงที่",
+"ไม่สามารถ implement ได้จริง",
+"h[n] = h[M-n] แต่ไม่มีตัวกลาง (N เป็นเลขคู่)",
+"เหมาะกับ Low-pass และ Band-pass",
+"ข้อ A, H, I ถูกทั้งหมด"], ans:[0,7,8,9]},
+
+{ch:8, q:"การทำ Convolution ของ x[n]=[1,1,1] กับ h[n]=[1,2,1] ผลลัพธ์คือข้อใด", opts:[
+"[1, 3, 4, 3, 1]","[1, 2, 1, 1, 1]","[2, 4, 2]","[1, 1, 1, 2, 1]",
+"[1, 3, 3, 3, 1]","[3, 6, 3]","[1, 2, 3, 2, 1]","[4, 4, 4]",
+"ความยาวผลลัพธ์ = 3+3-1 = 5 จุด","ข้อ A ถูก และข้อ I ก็ถูกด้วย"], ans:[0,8,9]},
+
+{ch:8, q:"Block Diagram ของ FIR filter order N ประกอบด้วยอะไรบ้าง", opts:[
+"delay elements (z⁻¹) จำนวน N ตัว",
+"ตัวคูณ (multipliers) จำนวน N+1 ตัว (สำหรับ b₀ ถึง b_N)",
+"ตัวบวก (adders) จำนวน N ตัว",
+"feedback path จาก output กลับ input",
+"ไม่มี delay element เลย",
+"เป็นโครงสร้าง Direct Form ที่ไม่มี recursive part",
+"ข้อ A, B, C, F ถูกทั้งหมด",
+"ใช้ memory จำนวน N+1 ตำแหน่ง",
+"มี poles ทุกตัวอยู่ที่ origin (z=0)",
+"ข้อ G, H, I ถูกทั้งหมดเมื่อรวมกับข้อ A-C"], ans:[0,1,2,5,6,8,9]},
+
+{ch:8, q:"Parks-McClellan (Remez Exchange) algorithm ใช้ออกแบบ FIR filter อย่างไร", opts:[
+"เป็นวิธี Optimal equiripple design ที่ minimize maximum error",
+"ให้ ripple เท่ากันทั้ง passband และ stopband (equiripple)",
+"ให้ transition band แคบที่สุดสำหรับ order ที่กำหนด",
+"เป็นวิธี Window method แบบพิเศษ",
+"ใช้ได้เฉพาะ Low-pass filter",
+"ให้ผลดีกว่า Window method ในแง่ transition bandwidth",
+"ใช้หลักการ Chebyshev approximation",
+"ต้องกำหนด passband/stopband frequencies และ ripple ที่ยอมรับได้",
+"เป็น iterative algorithm",
+"ข้อ A, B, C, F, G, H, I ถูกทั้งหมด"], ans:[0,1,2,5,6,7,8,9]},
+
+{ch:8, q:"ถ้า FIR filter มี impulse response h[n] = [0.25, 0.5, 0.25] filter นี้มีคุณสมบัติอย่างไร", opts:[
+"เป็น Low-pass filter (weighted moving average)",
+"มี Linear phase เพราะ symmetric: h[0]=h[2]=0.25",
+"DC gain: H(e^j0) = 0.25+0.5+0.25 = 1.0",
+"Order = 2, taps = 3",
+"เป็น High-pass filter",
+"Nyquist gain: H(e^jπ) = 0.25-0.5+0.25 = 0",
+"เป็น Type I FIR (symmetric, odd length)",
+"Group delay = 1 sample",
+"ข้อ A-D, F-H ถูกทั้งหมด",
+"เป็น Band-pass filter"], ans:[0,1,2,3,5,6,7,8]},
+
+// ===== CHAPTER 9: IIR Filter (15 questions) =====
+{ch:9, q:"IIR Filter แตกต่างจาก FIR Filter อย่างไร", opts:[
+"IIR มี feedback (recursive) ทำให้ impulse response ยาวไม่จำกัด",
+"IIR ใช้ coefficients น้อยกว่า FIR สำหรับ specification เดียวกัน",
+"IIR อาจไม่เสถียร ถ้า poles อยู่นอก unit circle",
+"IIR มี linear phase เสมอ",
+"IIR ไม่มี transfer function",
+"IIR ออกแบบจาก analog prototype ได้ด้วย BLT",
+"IIR มี poles ที่ไม่ใช่ z=0",
+"สมการ: y[n] = Σa_k·y[n-k] + Σb_k·x[n-k]",
+"IIR ดีกว่า FIR ทุกกรณี",
+"ข้อ A, B, C, F, G, H ถูกทั้งหมด"], ans:[0,1,2,5,6,7,9]},
+
+{ch:9, q:"เงื่อนไขความเสถียร (Stability) ของ IIR filter คือข้อใด", opts:[
+"Poles ทั้งหมดต้องอยู่ภายใน unit circle (|z| < 1)",
+"Zeros ทั้งหมดต้องอยู่ภายใน unit circle",
+"Poles ทั้งหมดต้องอยู่ในแกน real เท่านั้น",
+"BIBO stable: bounded input ให้ bounded output",
+"Σ|h[n]| < ∞ (impulse response absolutely summable)",
+"ข้อ A, D, E เป็นเงื่อนไขเทียบเท่ากัน",
+"Coefficients ทั้งหมดต้องเป็นค่าบวก",
+"Transfer function H(z) ต้องเป็น minimum phase",
+"Denominator polynomial A(z) ต้องไม่มีรากบน unit circle",
+"Poles บน unit circle ทำให้ marginally stable"], ans:[0,3,4,5,8,9]},
+
+{ch:9, q:"Bilinear Transform (BLT) ใช้สูตรการแปลงอย่างไร", opts:[
+"s = (2/T)·(1-z⁻¹)/(1+z⁻¹)",
+"s = (1-z⁻¹)/T",
+"s = z⁻¹",
+"s = (2/T)·(1+z⁻¹)/(1-z⁻¹)",
+"s = e^(jωT)",
+"z = e^(sT) (impulse invariance)",
+"s = (T/2)·(1-z⁻¹)/(1+z⁻¹)",
+"ใช้ mapping: Ω = (2/T)·tan(ω/2) สำหรับ pre-warping",
+"BLT แปลง jΩ axis → unit circle แบบ one-to-one",
+"ข้อ A, H, I ถูกทั้งหมด"], ans:[0,7,8,9]},
+
+{ch:9, q:"Frequency Warping ใน BLT คืออะไร และแก้ไขอย่างไร", opts:[
+"ความสัมพันธ์ระหว่าง analog frequency (Ω) กับ digital frequency (ω) ไม่เป็นเส้นตรง",
+"ใช้ Pre-warping: Ωc = (2/T)·tan(ωc/2) เพื่อชดเชย",
+"ทำให้ cutoff frequency ของ digital filter เพี้ยนจากที่ออกแบบ",
+"Frequency warping ไม่มีผลกระทบใดๆ",
+"เกิดจาก tan() ใน BLT mapping",
+"เกิดเฉพาะที่ความถี่สูง (ใกล้ Nyquist)",
+"ไม่สามารถแก้ไข warping ได้",
+"Warping compress ความถี่สูงใน analog ให้อยู่ภายใน [0, π]",
+"ข้อ A, B, C, E, H ถูกทั้งหมด",
+"ใช้ Zero-order hold แทน BLT จะไม่มี warping"], ans:[0,1,2,4,5,7,8]},
+
+{ch:9, q:"Butterworth filter มีคุณสมบัติอย่างไร (เลือกได้หลายข้อ)", opts:[
+"Maximally flat magnitude response ใน passband",
+"Magnitude response: |H(jΩ)|² = 1/(1+(Ω/Ωc)^(2N))",
+"Transition band กว้างกว่า Chebyshev ที่ order เดียวกัน",
+"ไม่มี ripple ใน passband",
+"ไม่มี ripple ใน stopband",
+"Poles อยู่บนวงกลมรัศมี Ωc เท่าๆ กัน",
+"Roll-off rate = -20N dB/decade",
+"เป็น all-pole filter (ไม่มี zeros ยกเว้นที่ s=∞)",
+"Butterworth ให้ transition band แคบที่สุดในบรรดา IIR filters",
+"Phase response เป็น linear"], ans:[0,1,2,3,4,5,6,7]},
+
+{ch:9, q:"Chebyshev Type I filter ต่างจาก Butterworth อย่างไร", opts:[
+"มี equiripple ใน passband",
+"Transition band แคบกว่า Butterworth ที่ order เดียวกัน",
+"ไม่มี ripple ใน stopband",
+"มี ripple ทั้ง passband และ stopband",
+"ต้องการ order น้อยกว่า Butterworth สำหรับ spec เดียวกัน",
+"Passband ไม่ flat เหมือน Butterworth",
+"Phase response แย่กว่า Butterworth",
+"Poles อยู่บนวงรี (ellipse) ไม่ใช่วงกลม",
+"ข้อ A, B, C, E, F, G, H ถูกทั้งหมด",
+"มี maximally flat passband"], ans:[0,1,2,4,5,6,7,8]},
+
+{ch:9, q:"Chebyshev Type II filter มีลักษณะอย่างไร", opts:[
+"Passband flat (ไม่มี ripple), มี equiripple ใน stopband",
+"มี equiripple ทั้ง passband และ stopband",
+"เรียกอีกชื่อว่า Inverse Chebyshev",
+"Transition band แคบกว่า Butterworth",
+"ตรงข้ามกับ Chebyshev Type I ในแง่ ripple location",
+"มี zeros ใน stopband ที่ทำให้เกิด notch",
+"ข้อ A, C, D, E, F ถูกทั้งหมด",
+"Phase response เป็น linear เสมอ",
+"เป็น FIR filter",
+"Roll-off เร็วกว่า Elliptic filter"], ans:[0,2,3,4,5,6]},
+
+{ch:9, q:"Elliptic (Cauer) filter มีข้อดีข้อเสียอย่างไร", opts:[
+"มี equiripple ทั้ง passband และ stopband",
+"ให้ transition band แคบที่สุดในบรรดา IIR filters ที่ order เดียวกัน",
+"ต้องการ order น้อยที่สุดสำหรับ spec ที่กำหนด",
+"Phase response แย่ที่สุดในบรรดา classical IIR filters",
+"ออกแบบซับซ้อนที่สุด",
+"ไม่มี ripple เลย",
+"เหมือน Butterworth ทุกประการ",
+"มีทั้ง poles และ finite zeros",
+"ข้อ A-E, H ถูกทั้งหมด",
+"เป็น FIR filter ประเภทหนึ่ง"], ans:[0,1,2,3,4,7,8]},
+
+{ch:9, q:"Pole-Zero plot ของ IIR filter บอกอะไรได้บ้าง (เลือกได้หลายข้อ)", opts:[
+"ตำแหน่ง poles บอกเรื่องเสถียรภาพ",
+"Poles ใกล้ unit circle ทำให้มี peak ใน magnitude response ที่ความถี่นั้น",
+"Zeros บน unit circle ทำให้ magnitude = 0 ที่ความถี่นั้น (notch)",
+"Magnitude response คำนวณจากอัตราส่วนระยะทาง zeros/poles ถึง e^jω",
+"Poles อยู่ภายใน unit circle = BIBO stable",
+"Zeros ไม่มีผลต่อ frequency response",
+"Pole ที่ z = 0 ไม่มีผลต่อ magnitude response (เป็นแค่ delay)",
+"Conjugate poles/zeros จะเป็นคู่กันเสมอสำหรับ real coefficients",
+"ข้อ A-E, G, H ถูกทั้งหมด",
+"Poles บน unit circle ทำให้เกิดสัญญาณ oscillate ไม่หยุด"], ans:[0,1,2,3,4,6,7,8,9]},
+
+{ch:9, q:"ถ้า IIR filter มี transfer function H(z) = 1/(1-0.5z⁻¹) ข้อใดถูกต้อง (เลือกได้หลายข้อ)", opts:[
+"Pole อยู่ที่ z = 0.5 (ภายใน unit circle → stable)",
+"เป็น first-order Low-pass filter",
+"Impulse response: h[n] = (0.5)^n · u[n]",
+"DC gain: H(e^j0) = 1/(1-0.5) = 2",
+"Nyquist gain: H(e^jπ) = 1/(1+0.5) = 2/3",
+"เป็น FIR filter",
+"Pole อยู่ที่ z = -0.5",
+"มี zero ที่ z = 0.5",
+"ข้อ A-E ถูกทั้งหมด",
+"Impulse response จบลงใน 2 samples"], ans:[0,1,2,3,4,8]},
+
+{ch:9, q:"Direct Form II (DF-II) structure ของ IIR filter มีข้อดีอย่างไร", opts:[
+"ใช้ delay elements น้อยที่สุด (canonical form)",
+"จำนวน delay = max(M, N) แทนที่จะเป็น M+N ของ DF-I",
+"Feedback และ feedforward ใช้ delay elements ร่วมกัน",
+"มีปัญหา coefficient sensitivity น้อยกว่า DF-I",
+"ใช้ memory น้อยกว่า DF-I",
+"เหมาะกับ fixed-point implementation มากกว่า DF-I",
+"ข้อ A, B, C, E ถูกทั้งหมด",
+"DF-II ทำให้ filter เสถียรขึ้น",
+"DF-II ไม่มีปัญหา overflow",
+"DF-II ใช้ได้เฉพาะกับ first-order filter"], ans:[0,1,2,4,6]},
+
+{ch:9, q:"Notch Filter ออกแบบโดยใช้ Pole-Zero placement อย่างไร", opts:[
+"วาง zeros บน unit circle ที่ความถี่ที่ต้องการกำจัด",
+"วาง poles ใกล้ zeros (ภายใน unit circle) เพื่อควบคุม bandwidth",
+"Notch ที่ 50 Hz (fs=1000): θ = 2π×50/1000 = 0.1π → zeros ที่ e^(±j0.1π)",
+"ยิ่ง poles ใกล้ unit circle → bandwidth ของ notch ยิ่งแคบ",
+"ยิ่ง poles ใกล้ unit circle → bandwidth ของ notch ยิ่งกว้าง",
+"ใช้ FIR filter เท่านั้นในการทำ notch",
+"Notch filter ต้องมี order สูงมากเสมอ",
+"Transfer function: H(z) = (1 - 2cos(θ)z⁻¹ + z⁻²) / (1 - 2r·cos(θ)z⁻¹ + r²z⁻²)",
+"ค่า r (รัศมีของ poles) ยิ่งใกล้ 1 → notch ยิ่งแคบและลึก",
+"ข้อ A-D, H, I ถูกทั้งหมด"], ans:[0,1,2,3,7,8,9]},
+
+{ch:9, q:"Impulse Invariance Method ต่างจาก BLT อย่างไร", opts:[
+"ใช้ z = e^(sT) ในการแปลง (sampling impulse response ของ analog filter)",
+"อาจเกิด aliasing ใน frequency domain",
+"เหมาะกับ Low-pass และ Band-pass filter เท่านั้น",
+"ไม่เหมาะกับ High-pass filter เพราะ aliasing",
+"ไม่มี frequency warping",
+"ให้ผลเหมือน BLT ทุกประการ",
+"BLT ดีกว่า Impulse Invariance ในทุกกรณี",
+"Preserves impulse response shape ของ analog filter",
+"ข้อ A-E, H ถูกทั้งหมด",
+"ใช้ pre-warping เหมือน BLT"], ans:[0,1,2,3,4,7,8]},
+
+{ch:9, q:"การเปรียบเทียบ IIR Filter types: เรียงลำดับจาก transition band กว้างสุดไปแคบสุด", opts:[
+"Butterworth → Chebyshev I → Chebyshev II → Elliptic",
+"Elliptic → Chebyshev → Butterworth",
+"Butterworth → Elliptic → Chebyshev",
+"ทุกแบบมี transition band เท่ากัน",
+"Chebyshev I → Butterworth → Elliptic → Chebyshev II",
+"ลำดับขึ้นกับ order เท่านั้น ไม่ขึ้นกับ type",
+"Elliptic ให้ transition band แคบสุด (ดีสุด) สำหรับ order เดียวกัน",
+"Butterworth ให้ transition band กว้างสุด (แย่สุด) สำหรับ order เดียวกัน",
+"ข้อ A, G, H ถูกทั้งหมด",
+"Chebyshev I กับ II มี transition band เท่ากันเสมอ"], ans:[0,6,7,8]},
+
+{ch:9, q:"Second-Order Section (SOS / Biquad) ใช้ implement IIR filter เพราะเหตุใด", opts:[
+"ลดปัญหา coefficient sensitivity เมื่อ order สูง",
+"แบ่ง high-order filter เป็น cascade ของ 2nd-order sections",
+"แต่ละ section มี transfer function: H_k(z) = (b₀+b₁z⁻¹+b₂z⁻²)/(1+a₁z⁻¹+a₂z⁻²)",
+"ลดปัญหา overflow ใน fixed-point arithmetic",
+"ทำให้ implementation ง่ายกว่า direct form ที่ order สูง",
+"SOS ทำให้ filter มี linear phase",
+"SOS ใช้ได้เฉพาะ Butterworth filter",
+"แต่ละ section จัดการ pole-zero pair หนึ่งคู่",
+"ข้อ A-E, H ถูกทั้งหมด",
+"SOS ทำให้ filter เสถียรขึ้นเพราะ poles ของแต่ละ section ถูก bound ง่ายกว่า"], ans:[0,1,2,3,4,7,8,9]},
+
+// ===== CHAPTER 10: Time Series Analysis (15 questions) =====
+{ch:10, q:"Time Series Analysis คืออะไร", opts:[
+"การวิเคราะห์ข้อมูลที่เก็บตามลำดับเวลาเพื่อหา pattern, trend, seasonality",
+"การวิเคราะห์สัญญาณ analog เท่านั้น",
+"เป็นเรื่องเดียวกับ Fourier Transform",
+"ใช้ได้เฉพาะในทาง financial data",
+"เป็นการวิเคราะห์ข้อมูลแบบ cross-sectional",
+"ใช้วิเคราะห์ vibration, weather, stock price, sensor data ฯลฯ",
+"เป็นสาขาหนึ่งของ DSP ที่เน้น statistical analysis",
+"ข้อ A, F, G ถูกทั้งหมด",
+"ไม่เกี่ยวข้องกับ DSP เลย",
+"Time Series = Fourier Series"], ans:[0,5,6,7]},
+
+{ch:10, q:"องค์ประกอบหลักของ Time Series ประกอบด้วยอะไรบ้าง (เลือกได้หลายข้อ)", opts:[
+"Trend (แนวโน้มระยะยาว)",
+"Seasonality (รูปแบบที่ซ้ำตามฤดูกาล/ช่วงเวลา)",
+"Cyclical component (วัฏจักรที่ไม่ fixed period)",
+"Irregular/Random component (noise)",
+"DC component เท่านั้น",
+"แยกได้: x(t) = Trend + Seasonal + Cyclical + Random",
+"Harmonic component (ความถี่หลักและ harmonics)",
+"ข้อ A-D, F ถูกทั้งหมด",
+"มีแค่ Trend กับ Noise เท่านั้น",
+"ข้อ A-D, F, G ถูกทั้งหมด"], ans:[0,1,2,3,5,7]},
+
+{ch:10, q:"Stationarity ในบริบทของ Time Series หมายถึงอะไร", opts:[
+"คุณสมบัติทางสถิติ (mean, variance, autocorrelation) ไม่เปลี่ยนตามเวลา",
+"สัญญาณมีค่าคงที่ตลอดเวลา",
+"สัญญาณเป็น periodic เสมอ",
+"Weak (Wide-Sense) Stationary: E[x(t)] = const, R(τ) ขึ้นกับ τ เท่านั้น",
+"Strict Stationary: joint distribution ไม่เปลี่ยนเมื่อ shift เวลา",
+"Non-stationary signal สามารถทำให้ stationary ได้ด้วย differencing",
+"ข้อ A, D, E, F ถูกทั้งหมด",
+"สัญญาณทุกตัวเป็น stationary",
+"Stationarity ไม่สำคัญใน Time Series Analysis",
+"Stationary หมายถึงสัญญาณไม่มี noise"], ans:[0,3,4,5,6]},
+
+{ch:10, q:"Autocorrelation Function R(τ) บอกอะไร", opts:[
+"วัดความสัมพันธ์ระหว่างสัญญาณกับตัวมันเองที่เลื่อนเวลาไป τ",
+"R(τ) = E[x(t)·x(t+τ)]",
+"R(0) = E[x²(t)] = average power ของสัญญาณ",
+"|R(τ)| ≤ R(0) เสมอ (ค่าสูงสุดอยู่ที่ τ=0)",
+"R(τ) = R(-τ) (even function สำหรับ real signals)",
+"ใช้หาว่าสัญญาณมี periodicity หรือไม่",
+"ถ้า R(τ) ลดลงช้า → สัญญาณมี long-term correlation",
+"ข้อ A-G ถูกทั้งหมด",
+"Autocorrelation เป็นเรื่องเดียวกับ convolution",
+"R(τ) มีค่าเป็นลบไม่ได้"], ans:[0,1,2,3,4,5,6,7]},
+
+{ch:10, q:"Power Spectral Density (PSD) สัมพันธ์กับ Autocorrelation อย่างไร", opts:[
+"PSD = Fourier Transform ของ Autocorrelation function (Wiener-Khinchin theorem)",
+"S(f) = ∫ R(τ)·e^(-j2πfτ) dτ",
+"PSD บอกว่าพลังงานกระจายตัวอย่างไรในแต่ละความถี่",
+"PSD ≥ 0 เสมอ (ไม่เป็นลบ)",
+"∫ S(f) df = R(0) = average power",
+"PSD = |X(f)|² / T สำหรับ finite-length signal",
+"PSD ใช้หา dominant frequency ของสัญญาณ",
+"ข้อ A-G ถูกทั้งหมด",
+"PSD = Inverse FT ของ Autocorrelation",
+"PSD ใช้ได้เฉพาะ periodic signals"], ans:[0,1,2,3,4,5,6,7]},
+
+{ch:10, q:"Differencing (การหาผลต่าง) ใช้ทำอะไรใน Time Series", opts:[
+"ลบ Trend ออกจากข้อมูลเพื่อทำให้ stationary",
+"First-order differencing: y[n] = x[n] - x[n-1]",
+"Second-order differencing: y[n] = x[n] - 2x[n-1] + x[n-2]",
+"เทียบเท่ากับ FIR High-pass filter",
+"Differencing เพิ่ม noise ในข้อมูล",
+"ข้อ A-D ถูกทั้งหมด",
+"เป็นวิธีเดียวในการลบ Trend",
+"ใช้กับ Seasonal differencing ได้: y[n] = x[n] - x[n-T]",
+"Transfer function: H(z) = 1 - z⁻¹ สำหรับ first-order differencing",
+"ข้อ A-D, H, I ถูกทั้งหมด"], ans:[0,1,2,3,4,5,7,8,9]},
+
+{ch:10, q:"Moving Average (MA) ใน Time Series Analysis แตกต่างจาก MA ใน FIR filter อย่างไร", opts:[
+"ทั้งคู่ใช้หลักการเดียวกัน: เฉลี่ยค่าตัวอย่างใกล้เคียง",
+"MA ใน Time Series ใช้ smooth ข้อมูลเพื่อเห็น trend",
+"MA(q) model: x[t] = μ + ε[t] + θ₁ε[t-1] + ... + θ_qε[t-q]",
+"MA ใน FIR = weighted sum ของ input samples",
+"MA ใน Time Series (ARMA) = weighted sum ของ past errors",
+"ข้อ C (MA model) ใช้ในบริบท ARIMA modeling",
+"ข้อ A-F ถูกทั้งหมด",
+"ไม่มีความเกี่ยวข้องกันเลย",
+"MA model ใน Time Series เป็น IIR filter",
+"ทั้งคู่เป็น High-pass filter"], ans:[0,1,2,3,4,5,6]},
+
+{ch:10, q:"AR (Autoregressive) Model คืออะไร", opts:[
+"Model ที่ output เป็น linear combination ของ past values + noise: x[t] = Σφ_k·x[t-k] + ε[t]",
+"AR(p): ใช้ p ค่าในอดีตในการพยากรณ์",
+"เทียบเท่ากับ IIR (all-pole) filter",
+"AR(1): x[t] = φ·x[t-1] + ε[t], stable เมื่อ |φ| < 1",
+"AR model ใช้พยากรณ์ค่าในอนาคตได้",
+"AR model ไม่มี feedback",
+"AR model เป็น FIR filter",
+"Yule-Walker equations ใช้หา AR coefficients จาก autocorrelation",
+"ข้อ A-E, H ถูกทั้งหมด",
+"AR model ใช้ได้เฉพาะกับ white noise"], ans:[0,1,2,3,4,7,8]},
+
+{ch:10, q:"ARMA(p,q) Model คืออะไร", opts:[
+"รวม AR(p) กับ MA(q): x[t] = Σφ_k·x[t-k] + ε[t] + Σθ_k·ε[t-k]",
+"p = order ของ AR part, q = order ของ MA part",
+"เทียบเท่ากับ IIR filter ที่มีทั้ง poles (AR) และ zeros (MA)",
+"ARMA(1,0) = AR(1), ARMA(0,1) = MA(1)",
+"ใช้ model สัญญาณ stationary ได้ทั่วไปมากกว่า AR หรือ MA อย่างเดียว",
+"ARMA model เหมาะกับ non-stationary data โดยตรง",
+"ข้อ A-E ถูกทั้งหมด",
+"ARMA เป็น FIR filter",
+"เป็นเรื่องเดียวกับ FFT",
+"ARMA ใช้ได้เฉพาะกับ financial data"], ans:[0,1,2,3,4,6]},
+
+{ch:10, q:"ARIMA(p,d,q) Model แตกต่างจาก ARMA อย่างไร", opts:[
+"เพิ่ม I (Integrated) = differencing d ครั้งเพื่อ handle non-stationary data",
+"d = จำนวนครั้งที่ต้อง difference เพื่อทำให้ stationary",
+"ARIMA(p,0,q) = ARMA(p,q)",
+"เหมาะกับข้อมูลที่มี trend",
+"ARIMA(0,1,0) = random walk with differencing",
+"ข้อ A-E ถูกทั้งหมด",
+"ARIMA ไม่ handle seasonality (ต้องใช้ SARIMA)",
+"d ต้องเป็นจำนวนเต็มบวก",
+"ARIMA = FIR + IIR combined",
+"ข้อ A-G ถูกทั้งหมด"], ans:[0,1,2,3,4,5,6,9]},
+
+{ch:10, q:"Periodogram คืออะไร และสัมพันธ์กับ PSD อย่างไร", opts:[
+"ประมาณค่า PSD จาก finite-length data โดยใช้ |DFT|²/N",
+"เป็น estimate ที่ inconsistent (variance ไม่ลดเมื่อ N เพิ่ม)",
+"ปรับปรุงได้ด้วย Welch's method (averaging periodograms)",
+"ปรับปรุงได้ด้วย Bartlett's method (averaging non-overlapping segments)",
+"ใช้ window function ช่วยลด spectral leakage ใน periodogram",
+"Periodogram ให้ค่า PSD ที่แม่นยำสมบูรณ์เสมอ",
+"Periodogram = PSD ที่แท้จริง ไม่ใช่ estimate",
+"ข้อ A-E ถูกทั้งหมด",
+"ไม่เกี่ยวข้องกับ DFT/FFT",
+"Periodogram ใช้ได้เฉพาะ stationary signals"], ans:[0,1,2,3,4,7]},
+
+{ch:10, q:"Welch's Method ปรับปรุง Periodogram อย่างไร (เลือกได้หลายข้อ)", opts:[
+"แบ่งข้อมูลเป็น segments ที่ overlap กัน",
+"แต่ละ segment คูณด้วย window function",
+"คำนวณ periodogram ของแต่ละ segment แล้วหาค่าเฉลี่ย",
+"ลด variance ของ PSD estimate",
+"แลกกับ frequency resolution ที่ลดลง (เพราะ segment สั้นลง)",
+"ใช้ overlap 50% เป็นค่าที่นิยม",
+"ให้ค่า PSD ที่ consistent มากขึ้น",
+"ข้อ A-G ถูกทั้งหมด",
+"ไม่ต้องใช้ FFT เลย",
+"ใช้ได้เฉพาะ white noise"], ans:[0,1,2,3,4,5,6,7]},
+
+{ch:10, q:"Cross-correlation ใช้ทำอะไร", opts:[
+"วัดความสัมพันธ์ระหว่างสัญญาณ 2 ตัวที่ time lag ต่างๆ",
+"R_xy(τ) = E[x(t)·y(t+τ)]",
+"ใช้หา time delay ระหว่าง 2 สัญญาณ",
+"ใช้ใน radar, sonar เพื่อหาระยะทาง/ตำแหน่ง",
+"Cross-correlation ≠ Autocorrelation (cross = ต่างสัญญาณ, auto = สัญญาณเดียวกัน)",
+"ข้อ A-E ถูกทั้งหมด",
+"เหมือน convolution ทุกประการ",
+"ใช้ FFT คำนวณ cross-correlation ได้เร็ว: R_xy = IFFT{X*·Y}",
+"ข้อ A-E, H ถูกทั้งหมด",
+"Cross-correlation ใช้ได้เฉพาะ periodic signals"], ans:[0,1,2,3,4,5,7,8]},
+
+{ch:10, q:"White Noise มีคุณสมบัติอย่างไร (เลือกได้หลายข้อ)", opts:[
+"PSD คงที่ทุกความถี่: S(f) = σ² (flat spectrum)",
+"Autocorrelation: R(τ) = σ²·δ(τ) (uncorrelated ที่ทุก τ≠0)",
+"Mean = 0, Variance = σ²",
+"เป็น stationary process",
+"ไม่มี predictability (ไม่สามารถพยากรณ์ค่าถัดไปได้)",
+"White noise เป็น input สำคัญใน AR, MA, ARMA models",
+"ข้อ A-F ถูกทั้งหมด",
+"White noise มี PSD เป็นศูนย์",
+"White noise เป็น periodic signal",
+"White noise มี autocorrelation เป็นค่าคงที่ทุก τ"], ans:[0,1,2,3,4,5,6]},
+
+{ch:10, q:"การประยุกต์ใช้ FFT ร่วมกับ Time Series Analysis ทำได้อย่างไร (เลือกได้หลายข้อ)", opts:[
+"ใช้ FFT วิเคราะห์ dominant frequencies ในข้อมูล time series",
+"ใช้ PSD (ผ่าน FFT) ตรวจจับ periodicity ของข้อมูล",
+"ใช้ FFT-based filtering เพื่อลบ noise จาก time series",
+"ใช้ cross-correlation (ผ่าน FFT) หา lag ระหว่าง 2 time series",
+"ใช้ Spectrogram (STFT) วิเคราะห์ frequency ที่เปลี่ยนตามเวลา",
+"FFT ช่วยระบุ seasonal period ของข้อมูล",
+"FFT ไม่เกี่ยวข้องกับ Time Series Analysis",
+"ข้อ A-F ถูกทั้งหมด",
+"FFT ใช้แทน ARIMA model ได้ทุกกรณี",
+"ใช้ FFT คำนวณ ARMA coefficients โดยตรง"], ans:[0,1,2,3,4,5,7]}
+];
+
+// CALCULATION questions: ch, question, hint (solution)
+const CALC = [
+{ch:7, q:"กำหนด x[n] = {2, 1, -1, 0} (N=4)\n\nจงคำนวณ DFT โดยหา X[0], X[1], X[2], X[3]\n\n(ใช้สูตร X[k] = Σ x[n]·e^(-j2πkn/N) สำหรับ n = 0, 1, 2, 3)",
+hint:"X[0] = 2+1+(-1)+0 = 2\n\nX[1] = 2·1 + 1·e^(-jπ/2) + (-1)·e^(-jπ) + 0·e^(-j3π/2)\n     = 2 + 1·(-j) + (-1)·(-1) + 0\n     = 2 - j + 1 = 3 - j\n\nX[2] = 2·1 + 1·e^(-jπ) + (-1)·e^(-j2π) + 0·e^(-j3π)\n     = 2 + 1·(-1) + (-1)·(1) + 0\n     = 2 - 1 - 1 = 0\n\nX[3] = 2·1 + 1·e^(-j3π/2) + (-1)·e^(-j3π) + 0·e^(-j9π/2)\n     = 2 + 1·(j) + (-1)·(-1) + 0\n     = 2 + j + 1 = 3 + j\n\nX = {2, 3-j, 0, 3+j}  ← สังเกต conjugate symmetry: X[3]=X[1]*"},
+
+{ch:7, q:"สัญญาณ x(t) = 3cos(2π·100t) + sin(2π·250t) ถูก sample ที่ fs = 1000 Hz ใช้ DFT ขนาด N = 500\n\n(ก) คำนวณ Δf\n(ข) ความถี่ 100 Hz และ 250 Hz อยู่ที่ bin k เท่าใด\n(ค) ถ้าเปลี่ยนเป็น N = 200 จะเกิด spectral leakage กับความถี่ใดหรือไม่ เพราะอะไร",
+hint:"(ก) Δf = fs/N = 1000/500 = 2 Hz\n\n(ข) k₁₀₀ = 100/Δf = 100/2 = 50  →  bin k = 50\n    k₂₅₀ = 250/Δf = 250/2 = 125 →  bin k = 125\n\n(ค) N = 200 → Δf = 1000/200 = 5 Hz\n    100/5 = 20 (ลงตัว → ไม่มี leakage)\n    250/5 = 50 (ลงตัว → ไม่มี leakage)\n    ∴ ไม่เกิด spectral leakage เพราะทั้งสองความถี่หาร Δf ลงตัว\n\n    แต่ถ้าเปลี่ยนเป็นเช่น 103 Hz → 103/5 = 20.6 → ไม่ลงตัว → จะเกิด leakage"},
+
+{ch:8, q:"ออกแบบ FIR Low-pass filter ด้วย Window method\n- Cutoff frequency: fc = 1500 Hz\n- Sampling rate: fs = 8000 Hz\n- N = 5 taps (order 4), ใช้ Rectangular window\n\nจงหา:\n(ก) Normalized cutoff frequency ωc\n(ข) Ideal impulse response h_d[n] สำหรับ n = 0, 1, 2, 3, 4\n(ค) Final h[n] หลังคูณ Rectangular window",
+hint:"(ก) ωc = 2π·fc/fs = 2π·1500/8000 = 3π/8 = 0.375π rad/sample\n\n(ข) Ideal LPF: h_d[n] = sin(ωc·(n-α)) / (π·(n-α))\n    โดย α = (N-1)/2 = 2\n\n    h_d[0] = sin(0.375π·(-2)) / (π·(-2)) = sin(-0.75π)/(-2π)\n           = sin(0.75π)/(2π) = 0.7071/(2π) ≈ 0.1125\n    h_d[1] = sin(0.375π·(-1)) / (π·(-1)) = sin(-0.375π)/(-π)\n           = sin(0.375π)/π = 0.9239/π ≈ 0.2941\n    h_d[2] = ωc/π = 0.375  (ค่าที่ n=α ใช้ L'Hôpital)\n    h_d[3] = sin(0.375π·1) / (π·1) = 0.9239/π ≈ 0.2941\n    h_d[4] = sin(0.375π·2) / (π·2) = 0.7071/(2π) ≈ 0.1125\n\n(ค) Rectangular window = [1,1,1,1,1]\n    h[n] = h_d[n] · w[n] = [0.1125, 0.2941, 0.375, 0.2941, 0.1125]\n    สังเกต: symmetric → มี linear phase ✓"},
+
+{ch:8, q:"FIR filter มี h[n] = [1, -2, 1]\n\n(ก) เขียน difference equation\n(ข) หา Transfer function H(z)\n(ค) หา zeros ของ H(z)\n(ง) Filter นี้เป็น Low-pass, High-pass, หรือ Band-pass? อธิบาย",
+hint:"(ก) y[n] = x[n] - 2x[n-1] + x[n-2]\n\n(ข) H(z) = 1 - 2z⁻¹ + z⁻² = (1 - z⁻¹)²\n    หรือ H(z) = z⁻²(z² - 2z + 1) = z⁻²(z-1)²\n\n(ค) Zeros: z = 1 (double zero)\n    Poles: z = 0 (double pole, FIR)\n\n(ง) เป็น High-pass filter\n    - H(e^j0) = 1-2+1 = 0  (DC gain = 0 → กรอง DC ออก)\n    - H(e^jπ) = 1-2(-1)+1 = 4  (Nyquist gain = 4 → ผ่านความถี่สูง)\n    - Zero อยู่ที่ z=1 (ω=0) → กำจัด DC component\n    - นี่คือ second-order differentiator (High-pass)"},
+
+{ch:9, q:"กำหนด Analog Butterworth Low-pass filter order 1:\nH(s) = Ωc / (s + Ωc) โดย Ωc = 1 rad/s\n\nใช้ Bilinear Transform แปลงเป็น Digital filter ที่ fs = 2 Hz (T = 0.5 s)\n\n(ก) ทำ Pre-warping: หา Ωc ที่ต้องใช้ ถ้าต้องการ digital cutoff ωc = π/2\n(ข) แทนค่า s = (2/T)(1-z⁻¹)/(1+z⁻¹) แล้วหา H(z)",
+hint:"(ก) Pre-warping: Ωc = (2/T)·tan(ωc/2) = (2/0.5)·tan(π/4) = 4·1 = 4 rad/s\n\n(ข) H(s) = 4/(s+4)\n    แทน s = (2/0.5)·(1-z⁻¹)/(1+z⁻¹) = 4·(1-z⁻¹)/(1+z⁻¹)\n\n    H(z) = 4 / [4·(1-z⁻¹)/(1+z⁻¹) + 4]\n         = 4 / [4(1-z⁻¹+1+z⁻¹)/(1+z⁻¹)]\n         = 4(1+z⁻¹) / [4·2]\n         = (1+z⁻¹) / 2\n\n    H(z) = 0.5 + 0.5z⁻¹\n    → y[n] = 0.5·x[n] + 0.5·x[n-1]\n\n    นี่คือ 2-point moving average (FIR order 1)!\n    กรณีนี้ BLT ของ Butterworth order 1 ให้ผลเป็น FIR\n    เพราะ pre-warped Ωc พอดีกับ 2/T"},
+
+{ch:9, q:"IIR filter: y[n] = 0.8x[n] + 0.6y[n-1]\n\n(ก) หา Transfer function H(z)\n(ข) Filter นี้เสถียรหรือไม่ เพราะอะไร\n(ค) หา DC gain H(e^j0)\n(ง) หา impulse response h[n] 4 ตัวแรก",
+hint:"(ก) Y(z) = 0.8X(z) + 0.6z⁻¹Y(z)\n    Y(z)(1-0.6z⁻¹) = 0.8X(z)\n    H(z) = 0.8/(1-0.6z⁻¹)\n\n(ข) Pole อยู่ที่ z = 0.6\n    |0.6| < 1 (อยู่ภายใน unit circle)\n    ∴ Filter เสถียร ✓\n\n(ค) H(e^j0) = 0.8/(1-0.6) = 0.8/0.4 = 2.0\n    DC gain = 2.0 (เพิ่ม DC ขึ้น 2 เท่า)\n\n(ง) h[0] = 0.8\n    h[1] = 0.8·(0.6)¹ = 0.48\n    h[2] = 0.8·(0.6)² = 0.288\n    h[3] = 0.8·(0.6)³ = 0.1728\n    สูตรทั่วไป: h[n] = 0.8·(0.6)^n · u[n]  (exponential decay)"},
+
+{ch:9, q:"ออกแบบ Notch Filter เพื่อกำจัดความถี่ 60 Hz (สัญญาณรบกวนจากไฟฟ้า)\nfs = 600 Hz, ใช้ pole radius r = 0.9\n\n(ก) คำนวณ notch angle θ\n(ข) เขียน Transfer function H(z)\n(ค) Filter นี้เสถียรหรือไม่",
+hint:"(ก) θ = 2π·f₀/fs = 2π·60/600 = 2π/10 = π/5 = 0.6283 rad\n    cos(θ) = cos(π/5) = 0.8090\n\n(ข) Zeros ที่ e^(±jθ): z = e^(±jπ/5)\n    Poles ที่ r·e^(±jθ): z = 0.9·e^(±jπ/5)\n\n    H(z) = (1 - 2cos(θ)z⁻¹ + z⁻²) / (1 - 2r·cos(θ)z⁻¹ + r²z⁻²)\n         = (1 - 1.618z⁻¹ + z⁻²) / (1 - 1.4563z⁻¹ + 0.81z⁻²)\n\n    → y[n] = x[n] - 1.618x[n-1] + x[n-2] + 1.4563y[n-1] - 0.81y[n-2]\n\n(ค) Poles: z = 0.9·e^(±jπ/5)\n    |z| = 0.9 < 1 → อยู่ภายใน unit circle\n    ∴ Filter เสถียร ✓\n\n    ที่ ω = θ (60 Hz): Zeros อยู่บน unit circle → |H| = 0 → กำจัด 60 Hz สำเร็จ"},
+
+{ch:10, q:"ข้อมูล time series: x = [10, 12, 15, 13, 16, 18, 20, 19]\n\n(ก) คำนวณค่าเฉลี่ย (mean)\n(ข) ทำ First-order differencing: y[n] = x[n] - x[n-1]\n(ค) คำนวณ Moving Average แบบ 3-point: MA[n] = (x[n-1]+x[n]+x[n+1])/3\n     สำหรับ n = 1, 2, ..., 6",
+hint:"(ก) x̄ = (10+12+15+13+16+18+20+19)/8 = 123/8 = 15.375\n\n(ข) First-order differencing:\n    y[1] = 12-10 = 2\n    y[2] = 15-12 = 3\n    y[3] = 13-15 = -2\n    y[4] = 16-13 = 3\n    y[5] = 18-16 = 2\n    y[6] = 20-18 = 2\n    y[7] = 19-20 = -1\n    y = [2, 3, -2, 3, 2, 2, -1]  (ดู: Trend ที่เพิ่มขึ้นถูกลบออก ค่าเหลือสั้นๆ)\n\n(ค) 3-point Moving Average:\n    MA[1] = (10+12+15)/3 = 37/3 ≈ 12.33\n    MA[2] = (12+15+13)/3 = 40/3 ≈ 13.33\n    MA[3] = (15+13+16)/3 = 44/3 ≈ 14.67\n    MA[4] = (13+16+18)/3 = 47/3 ≈ 15.67\n    MA[5] = (16+18+20)/3 = 54/3 = 18.00\n    MA[6] = (18+20+19)/3 = 57/3 = 19.00\n    MA = [12.33, 13.33, 14.67, 15.67, 18.00, 19.00]  (smooth กว่าข้อมูลเดิม)"},
+
+{ch:10, q:"กำหนด AR(1) model: x[t] = 0.7·x[t-1] + ε[t] โดย ε[t] ~ WN(0, σ²=1)\n\n(ก) Model นี้ stationary หรือไม่ เพราะอะไร\n(ข) คำนวณ E[x[t]] (mean)\n(ค) คำนวณ Var[x[t]]\n(ง) คำนวณ Autocorrelation R(1) และ R(2)",
+hint:"(ก) AR(1) stationary เมื่อ |φ| < 1\n    φ = 0.7, |0.7| < 1 → Stationary ✓\n\n(ข) E[x[t]] = φ·E[x[t-1]] + E[ε[t]]\n    μ = 0.7μ + 0\n    0.3μ = 0 → μ = 0\n\n(ค) Var[x[t]] = φ²·Var[x[t-1]] + σ²\n    σ_x² = (0.7)²·σ_x² + 1\n    σ_x²(1 - 0.49) = 1\n    σ_x² = 1/0.51 = 1.9608\n\n(ง) Autocorrelation function:\n    R(τ) = σ_x² · φ^|τ|\n    R(0) = 1.9608\n    R(1) = 1.9608 × 0.7 = 1.3725\n    R(2) = 1.9608 × 0.7² = 1.9608 × 0.49 = 0.9608\n\n    Normalized autocorrelation:\n    ρ(1) = R(1)/R(0) = φ = 0.7\n    ρ(2) = R(2)/R(0) = φ² = 0.49"},
+
+{ch:10, q:"สัญญาณ x[n] มี 64 samples ถูก sample ที่ fs = 256 Hz\nทำ FFT แล้วพบว่า |X[k]| มี peak สูงสุดที่ k = 8 และ k = 24\n\n(ก) คำนวณ Δf\n(ข) Peak ที่ k=8 และ k=24 ตรงกับความถี่เท่าใด\n(ค) ถ้าต้องการ Δf = 1 Hz ต้องใช้ N เท่าใด (จำนวน samples)\n(ง) สัญญาณนี้มี dominant frequencies อะไรบ้าง",
+hint:"(ก) Δf = fs/N = 256/64 = 4 Hz\n\n(ข) f₁ = k₁ × Δf = 8 × 4 = 32 Hz\n    f₂ = k₂ × Δf = 24 × 4 = 96 Hz\n\n(ค) Δf = 1 Hz → N = fs/Δf = 256/1 = 256 samples\n    ต้องเก็บข้อมูล 256 จุด (หรือ zero-pad ให้ได้ 256)\n    แต่ zero-pad เพิ่มแค่ interpolation ไม่ได้เพิ่ม true resolution\n    True resolution ดีขึ้นต้องเก็บข้อมูลนานขึ้น: T = N/fs = 256/256 = 1 s\n\n(ง) Dominant frequencies: 32 Hz และ 96 Hz\n    สัญญาณน่าจะมีรูปแบบ: x(t) ≈ A·cos(2π·32t + φ₁) + B·cos(2π·96t + φ₂)\n    96/32 = 3 → อาจเป็น fundamental (32 Hz) กับ 3rd harmonic (96 Hz)"}
+];
+
+// ============ APP STATE ============
+let state = {
+  view: "home", // home, mcq, calc, results
+  currentQ: 0,
+  answers: {}, // {0: [indices], 1: [indices], ...}
+  calcAnswers: {}, // {0: "text", ...}
+  submitted: false,
+  showExplanation: {},
+  timer: 0,
+  timerInterval: null,
+  mcqFilter: "all" // all, 7, 8, 9, 10
+};
+
+function render() {
+  const app = document.getElementById("app");
+  if (state.view === "home") renderHome(app);
+  else if (state.view === "mcq") renderMCQ(app);
+  else if (state.view === "calc") renderCalc(app);
+  else if (state.view === "results") renderResults(app);
+}
+
+// ============ HOME ============
+function renderHome(app) {
+  app.innerHTML = `
+    <h1>DSP Practice Exam</h1>
+    <p class="subtitle">CP 412 006 — Digital Signal Processing — บท 7-10</p>
+    <div class="card" style="text-align:center;padding:30px">
+      <div style="font-size:3rem;margin-bottom:12px">📝</div>
+      <div style="font-size:1.1rem;font-weight:600;margin-bottom:8px">รูปแบบข้อสอบ</div>
+      <div style="color:var(--text2);font-size:.9rem;line-height:1.8">
+        <b>Part 1:</b> ข้อกา 60 ข้อ — ตัวเลือก 10 ข้อ (A-J)<br>
+        บางข้อตอบได้หลายคำตอบ บางข้อตอบได้คำตอบเดียว<br>
+        <span style="color:var(--yellow)">(ไม่มีการบอกว่าข้อไหนกี่คำตอบ)</span><br><br>
+        <b>Part 2:</b> ข้อเขียน/คำนวณ 10 ข้อ
+      </div>
+      <div style="margin-top:20px;display:flex;gap:10px;justify-content:center;flex-wrap:wrap">
+        <button class="btn btn-primary" onclick="startExam('mcq')" style="font-size:1rem;padding:12px 32px">เริ่ม Part 1 — ข้อกา</button>
+        <button class="btn btn-outline" onclick="startExam('calc')" style="font-size:1rem;padding:12px 32px">เริ่ม Part 2 — คำนวณ</button>
+      </div>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:10px">
+      <div class="card" style="text-align:center">
+        <div style="font-size:1.5rem">📊</div>
+        <div style="font-weight:600;margin:4px 0">Ch 7: DFT/FFT</div>
+        <div style="color:var(--text2);font-size:.8rem">${MCQ.filter(q=>q.ch===7).length} ข้อกา + ${CALC.filter(q=>q.ch===7).length} ข้อเขียน</div>
+      </div>
+      <div class="card" style="text-align:center">
+        <div style="font-size:1.5rem">🔧</div>
+        <div style="font-weight:600;margin:4px 0">Ch 8: FIR Filter</div>
+        <div style="color:var(--text2);font-size:.8rem">${MCQ.filter(q=>q.ch===8).length} ข้อกา + ${CALC.filter(q=>q.ch===8).length} ข้อเขียน</div>
+      </div>
+      <div class="card" style="text-align:center">
+        <div style="font-size:1.5rem">⚡</div>
+        <div style="font-weight:600;margin:4px 0">Ch 9: IIR Filter</div>
+        <div style="color:var(--text2);font-size:.8rem">${MCQ.filter(q=>q.ch===9).length} ข้อกา + ${CALC.filter(q=>q.ch===9).length} ข้อเขียน</div>
+      </div>
+      <div class="card" style="text-align:center">
+        <div style="font-size:1.5rem">📈</div>
+        <div style="font-weight:600;margin:4px 0">Ch 10: Time Series</div>
+        <div style="color:var(--text2);font-size:.8rem">${MCQ.filter(q=>q.ch===10).length} ข้อกา + ${CALC.filter(q=>q.ch===10).length} ข้อเขียน</div>
+      </div>
+    </div>
+  `;
+}
+
+function startExam(type) {
+  state.view = type;
+  state.currentQ = 0;
+  state.answers = {};
+  state.calcAnswers = {};
+  state.submitted = false;
+  state.showExplanation = {};
+  state.timer = 0;
+  state.mcqFilter = "all";
+  if (state.timerInterval) clearInterval(state.timerInterval);
+  state.timerInterval = setInterval(() => { state.timer++; updateTimer(); }, 1000);
+  render();
+}
+
+function updateTimer() {
+  const el = document.getElementById("timer");
+  if (el) {
+    const m = Math.floor(state.timer / 60);
+    const s = state.timer % 60;
+    el.textContent = `${String(m).padStart(2,"0")}:${String(s).padStart(2,"0")}`;
+  }
+}
+
+function formatTime(sec) {
+  const m = Math.floor(sec / 60);
+  const s = sec % 60;
+  return `${m} นาที ${s} วินาที`;
+}
+
+// ============ MCQ ============
+function getFilteredMCQ() {
+  if (state.mcqFilter === "all") return MCQ;
+  return MCQ.filter(q => q.ch === parseInt(state.mcqFilter));
+}
+
+function renderMCQ(app) {
+  const filtered = getFilteredMCQ();
+  const total = filtered.length;
+  const answered = filtered.filter((_, i) => {
+    const gi = MCQ.indexOf(filtered[i]);
+    return state.answers[gi] && state.answers[gi].length > 0;
+  }).length;
+
+  let navHtml = filtered.map((q, i) => {
+    const gi = MCQ.indexOf(q);
+    let cls = "nav-cell";
+    if (i === state.currentQ) cls += " current";
+    if (state.submitted) {
+      const ua = state.answers[gi] || [];
+      const correct = arraysEqual(ua.sort(), q.ans.sort());
+      cls += correct ? " nav-correct" : (ua.length > 0 ? " nav-wrong" : "");
+    } else if (state.answers[gi] && state.answers[gi].length > 0) {
+      cls += " answered";
+    }
+    return `<div class="${cls}" onclick="goToQ(${i})">${i+1}</div>`;
+  }).join("");
+
+  const q = filtered[state.currentQ];
+  const gi = MCQ.indexOf(q);
+  const ua = state.answers[gi] || [];
+  const chNames = {7:"DFT/FFT", 8:"FIR Filter", 9:"IIR Filter", 10:"Time Series"};
+
+  let optsHtml = q.opts.map((opt, oi) => {
+    let cls = "opt";
+    if (ua.includes(oi)) cls += " selected";
+    if (state.submitted) {
+      if (q.ans.includes(oi) ) cls += " show-correct";
+      else if (ua.includes(oi)) cls += " show-wrong";
+    }
+    return `<div class="${cls}" onclick="toggleOpt(${gi},${oi})">
+      <div class="opt-letter">${LETTERS[oi]}</div>
+      <div class="opt-text">${opt}</div>
+    </div>`;
+  }).join("");
+
+  let explanationHtml = "";
+  if (state.submitted) {
+    const correct = arraysEqual(ua.sort(), q.ans.sort());
+    const partialCorrect = !correct && ua.some(a => q.ans.includes(a));
+    const correctLetters = q.ans.map(i => LETTERS[i]).join(", ");
+    const isMulti = q.ans.length > 1;
+    explanationHtml = `
+      <div class="hint-box ans">
+        ${correct ? "✅ ถูกต้อง!" : partialCorrect ? "⚠️ ถูกบางส่วน" : "❌ ผิด"} —
+        คำตอบที่ถูก: <b>${correctLetters}</b>
+        ${isMulti ? `<span class="tag-multi" style="margin-left:6px">หลายคำตอบ (${q.ans.length})</span>` : `<span class="tag-single" style="margin-left:6px">คำตอบเดียว</span>`}
+      </div>`;
+  }
+
+  app.innerHTML = `
+    <div class="flex-between" style="margin-bottom:8px">
+      <h1 style="margin:0;font-size:1.2rem">Part 1 — ข้อกา</h1>
+      <div style="display:flex;align-items:center;gap:12px">
+        <div class="timer" id="timer">00:00</div>
+        <button class="btn btn-outline" onclick="goHome()" style="font-size:.8rem;padding:5px 12px">กลับหน้าหลัก</button>
+      </div>
+    </div>
+    <div class="tabs">
+      ${["all",7,8,9,10].map(f => `<div class="tab ${state.mcqFilter == f ? 'active':''}" onclick="setFilter('${f}')">
+        ${f==="all"?"ทั้งหมด":"Ch "+f}
+        <span class="badge">${f==="all"?MCQ.length:MCQ.filter(q=>q.ch===parseInt(f)).length}</span>
+      </div>`).join("")}
+    </div>
+    <div class="progress-bar"><div class="progress-fill" style="width:${(answered/total*100)}%"></div></div>
+    <div style="color:var(--text2);font-size:.8rem;text-align:right;margin-bottom:6px">ตอบแล้ว ${answered}/${total} ข้อ</div>
+    <div class="nav-grid">${navHtml}</div>
+    <div class="card ${state.submitted ? (arraysEqual(ua.sort(), q.ans.sort()) ? 'correct-card' : 'wrong-card') : ''}">
+      <div class="q-header">
+        <span class="q-num">ข้อ ${state.currentQ + 1} / ${total}</span>
+        <span class="q-ch">Ch ${q.ch} — ${chNames[q.ch]}</span>
+      </div>
+      <div class="q-text">${q.q.replace(/\n/g,"<br>")}</div>
+      <div style="color:var(--yellow);font-size:.8rem;margin-bottom:8px">💡 เลือกได้มากกว่า 1 ตัวเลือก (กดซ้ำเพื่อยกเลิก)</div>
+      <div class="options">${optsHtml}</div>
+      ${explanationHtml}
+    </div>
+    <div class="btn-row" style="justify-content:space-between">
+      <div style="display:flex;gap:6px">
+        <button class="btn btn-outline" onclick="prevQ()" ${state.currentQ===0?"disabled":""}>← ก่อนหน้า</button>
+        <button class="btn btn-outline" onclick="nextQ()" ${state.currentQ>=total-1?"disabled":""}>ถัดไป →</button>
+      </div>
+      <div style="display:flex;gap:6px">
+        ${!state.submitted ? `<button class="btn btn-green" onclick="submitExam()">ส่งข้อสอบ</button>` : `<button class="btn btn-primary" onclick="showResults()">ดูผลคะแนน</button>`}
+      </div>
+    </div>
+  `;
+  updateTimer();
+}
+
+function toggleOpt(gi, oi) {
+  if (state.submitted) return;
+  if (!state.answers[gi]) state.answers[gi] = [];
+  const idx = state.answers[gi].indexOf(oi);
+  if (idx >= 0) state.answers[gi].splice(idx, 1);
+  else state.answers[gi].push(oi);
+  render();
+}
+
+function goToQ(i) { state.currentQ = i; render(); }
+function prevQ() { if (state.currentQ > 0) { state.currentQ--; render(); } }
+function nextQ() { const f = getFilteredMCQ(); if (state.currentQ < f.length - 1) { state.currentQ++; render(); } }
+function setFilter(f) { state.mcqFilter = f; state.currentQ = 0; render(); }
+
+function submitExam() {
+  const total = MCQ.length;
+  const answered = Object.keys(state.answers).filter(k => state.answers[k].length > 0).length;
+  if (answered < total && !confirm(`คุณตอบแล้ว ${answered}/${total} ข้อ ต้องการส่งข้อสอบหรือไม่?`)) return;
+  state.submitted = true;
+  if (state.timerInterval) clearInterval(state.timerInterval);
+  render();
+}
+
+function showResults() {
+  state.view = "results";
+  render();
+}
+
+function goHome() {
+  if (state.timerInterval) clearInterval(state.timerInterval);
+  state.view = "home";
+  render();
+}
+
+function arraysEqual(a, b) {
+  if (a.length !== b.length) return false;
+  const sa = [...a].sort(), sb = [...b].sort();
+  return sa.every((v, i) => v === sb[i]);
+}
+
+// ============ CALC ============
+function renderCalc(app) {
+  const q = CALC[state.currentQ];
+  const chNames = {7:"DFT/FFT", 8:"FIR Filter", 9:"IIR Filter", 10:"Time Series"};
+
+  let navHtml = CALC.map((_, i) => {
+    let cls = "nav-cell";
+    if (i === state.currentQ) cls += " current";
+    if (state.calcAnswers[i] && state.calcAnswers[i].trim().length > 0) cls += " answered";
+    return `<div class="${cls}" onclick="goToCalcQ(${i})">${i+1}</div>`;
+  }).join("");
+
+  let hintHtml = "";
+  if (state.showExplanation[state.currentQ]) {
+    hintHtml = `<div class="hint-box explain"><b>เฉลย:</b><pre style="white-space:pre-wrap;margin-top:6px;font-family:'Courier New',monospace;font-size:.85rem;line-height:1.7">${q.hint}</pre></div>`;
+  }
+
+  app.innerHTML = `
+    <div class="flex-between" style="margin-bottom:8px">
+      <h1 style="margin:0;font-size:1.2rem">Part 2 — ข้อเขียน/คำนวณ</h1>
+      <div style="display:flex;align-items:center;gap:12px">
+        <div class="timer" id="timer">00:00</div>
+        <button class="btn btn-outline" onclick="goHome()" style="font-size:.8rem;padding:5px 12px">กลับหน้าหลัก</button>
+      </div>
+    </div>
+    <div class="nav-grid" style="grid-template-columns:repeat(10,1fr)">${navHtml}</div>
+    <div class="card">
+      <div class="q-header">
+        <span class="q-num">ข้อ ${state.currentQ + 1} / ${CALC.length}</span>
+        <span class="q-ch">Ch ${q.ch} — ${chNames[q.ch]}</span>
+      </div>
+      <div class="q-text" style="white-space:pre-wrap">${q.q}</div>
+      <textarea class="calc-input" id="calcAns" placeholder="พิมพ์คำตอบที่นี่..." oninput="saveCalcAns()">${state.calcAnswers[state.currentQ] || ""}</textarea>
+      <div class="btn-row" style="margin-top:10px">
+        <button class="btn ${state.showExplanation[state.currentQ] ? 'btn-primary':'btn-outline'}" onclick="toggleHint()">
+          ${state.showExplanation[state.currentQ] ? "ซ่อนเฉลย" : "ดูเฉลย"}
+        </button>
+      </div>
+      ${hintHtml}
+    </div>
+    <div class="btn-row" style="justify-content:space-between">
+      <div style="display:flex;gap:6px">
+        <button class="btn btn-outline" onclick="prevCalcQ()" ${state.currentQ===0?"disabled":""}>← ก่อนหน้า</button>
+        <button class="btn btn-outline" onclick="nextCalcQ()" ${state.currentQ>=CALC.length-1?"disabled":""}>ถัดไป →</button>
+      </div>
+      <button class="btn btn-outline" onclick="goHome()">กลับหน้าหลัก</button>
+    </div>
+  `;
+  updateTimer();
+}
+
+function goToCalcQ(i) { state.currentQ = i; render(); }
+function prevCalcQ() { if (state.currentQ > 0) { state.currentQ--; render(); } }
+function nextCalcQ() { if (state.currentQ < CALC.length - 1) { state.currentQ++; render(); } }
+function saveCalcAns() { state.calcAnswers[state.currentQ] = document.getElementById("calcAns").value; }
+function toggleHint() { state.showExplanation[state.currentQ] = !state.showExplanation[state.currentQ]; render(); }
+
+// ============ RESULTS ============
+function renderResults(app) {
+  let correct = 0, partial = 0, wrong = 0, unanswered = 0;
+  let byCh = {7:{c:0,t:0}, 8:{c:0,t:0}, 9:{c:0,t:0}, 10:{c:0,t:0}};
+
+  MCQ.forEach((q, i) => {
+    byCh[q.ch].t++;
+    const ua = state.answers[i] || [];
+    if (ua.length === 0) { unanswered++; return; }
+    if (arraysEqual(ua.sort(), q.ans.sort())) { correct++; byCh[q.ch].c++; }
+    else if (ua.some(a => q.ans.includes(a))) partial++;
+    else wrong++;
+  });
+
+  const pct = Math.round(correct / MCQ.length * 100);
+  const chNames = {7:"DFT/FFT", 8:"FIR Filter", 9:"IIR Filter", 10:"Time Series"};
+
+  app.innerHTML = `
+    <h1>ผลคะแนน</h1>
+    <div class="scoreboard">
+      <div class="score-big">${correct} / ${MCQ.length}</div>
+      <div class="score-sub">${pct}% — เวลาที่ใช้: ${formatTime(state.timer)}</div>
+      <div style="display:flex;justify-content:center;gap:20px;margin-top:14px;font-size:.85rem">
+        <span style="color:var(--green)">✅ ถูก: ${correct}</span>
+        <span style="color:var(--yellow)">⚠️ บางส่วน: ${partial}</span>
+        <span style="color:var(--red)">❌ ผิด: ${wrong}</span>
+        <span style="color:var(--text2)">⬜ ไม่ตอบ: ${unanswered}</span>
+      </div>
+    </div>
+    <div class="card">
+      <div style="font-weight:600;margin-bottom:10px">คะแนนแยกตามบท</div>
+      ${[7,8,9,10].map(ch => {
+        const d = byCh[ch];
+        const p = d.t > 0 ? Math.round(d.c/d.t*100) : 0;
+        return `<div class="summary-row">
+          <span>Ch ${ch}: ${chNames[ch]}</span>
+          <span><b>${d.c}/${d.t}</b> (${p}%)</span>
+        </div>`;
+      }).join("")}
+    </div>
+    <div style="display:flex;gap:8px;justify-content:center;margin-top:16px;flex-wrap:wrap">
+      <button class="btn btn-primary" onclick="reviewMCQ()">ดูเฉลยทีละข้อ</button>
+      <button class="btn btn-outline" onclick="startExam('calc')">ไปทำ Part 2</button>
+      <button class="btn btn-outline" onclick="goHome()">กลับหน้าหลัก</button>
+      <button class="btn btn-outline" onclick="retryExam()">ทำใหม่</button>
+    </div>
+  `;
+}
+
+function reviewMCQ() {
+  state.view = "mcq";
+  state.currentQ = 0;
+  state.mcqFilter = "all";
+  render();
+}
+
+function retryExam() {
+  state.answers = {};
+  state.submitted = false;
+  state.showExplanation = {};
+  startExam("mcq");
+}
+
+// ============ INIT ============
+render();
+</script>
+</body>
+</html>
